@@ -1,0 +1,11 @@
+{
+  "name": "Building_Time",
+  "version": "0.1.0",
+  "title": "Building Time",
+  "author": "Klonan",
+  "contact": "",
+  "homepage": "",
+  "description": "Adds a building time to buildings",
+  "dependencies": ["base >= 0.17.69"],
+  "factorio_version": "0.17"
+}
