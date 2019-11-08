@@ -1,3 +1,5 @@
+local shared = require("shared")
+
 local script_data =
 {
   building_finished = {},
@@ -5,8 +7,9 @@ local script_data =
 }
 
 
+local insert = table.insert
 
-local add_building_finished = function(tick, entity, smoke)
+local add_building_finished = function(tick, entity, unit_number)
 
   local buildings = script_data.building_finished[tick]
   if not buildings then
@@ -14,9 +17,13 @@ local add_building_finished = function(tick, entity, smoke)
     script_data.building_finished[tick] = buildings
   end
 
-  table.insert(buildings, {entity = entity, smoke = smoke})
+  buildings[unit_number] = entity
 
 end
+
+local ceil = math.ceil
+local max = math.max
+local min = math.min
 
 local on_built_entity = function(event)
 
@@ -27,21 +34,16 @@ local on_built_entity = function(event)
   if not unit_number then return end
 
   local health = entity.prototype.max_health
-  if not health then return end
+  if not (health and health > 0) then return end
+
   entity.health = 0
-  local duration = math.ceil(health / 25) * 60
-
-  local smoke = entity.surface.create_entity{name = "protoss-building-smoke", position = entity.position, force = entity.force}
-
-  add_building_finished(event.tick + duration, entity, smoke)
+  local duration = ceil(1 + (health / shared.repair_rate)) * 60
+  add_building_finished(event.tick + duration, entity, unit_number)
   entity.active = false
-  --entity.minable = false
-  --entity.operable = false
-  --entity.rotatable = false
 
+  local size = min(ceil((max(entity.get_radius() - 0.1, 0.25)) * 2), 10)
+  local smoke = entity.surface.create_entity{name = "building-smoke-"..size, position = entity.position, force = entity.force}
   script_data.entity_smoke[unit_number] = smoke
-
-
 
 end
 
@@ -49,24 +51,20 @@ local on_tick = function(event)
   local buildings = script_data.building_finished[event.tick]
   if not buildings then return end
 
-  for k, building in pairs (buildings) do
-    local entity = building.entity
+  local entity_smoke = script_data.entity_smoke
+
+  for unit_number, entity in pairs (buildings) do
     if entity and entity.valid then
       entity.active = true
-      --entity.minable = true
-      --entity.operable = true
-      --entity.rotatable = true
+      local smoke = entity_smoke[unit_number]
+      if smoke and smoke.valid then
+        smoke.destroy()
+      end
+      entity_smoke[unit_number] = nil
     end
-
-    local smoke = building.smoke
-    if smoke and smoke.valid then
-      smoke.destroy()
-    end
-
   end
 
   script_data.building_finished[event.tick] = nil
-
 
 end
 
@@ -86,7 +84,6 @@ local on_entity_removed = function(event)
     smoke.destroy()
   end
 
-
 end
 
 local lib = {}
@@ -103,19 +100,15 @@ lib.events =
   [defines.events.on_robot_mined_entity] = on_entity_removed,
   [defines.events.script_raised_destroy] = on_entity_removed,
 
-
   [defines.events.on_tick] = on_tick,
-
-
-
 }
 
 lib.on_load = function()
-  script_data = global.protoss_building or script_data
+  script_data = global.building_time or script_data
 end
 
 lib.on_init = function()
-  global.protoss_building = global.protoss_building or script_data
+  global.building_time = global.building_time or script_data
 end
 
 return lib

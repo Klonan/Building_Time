@@ -1,4 +1,4 @@
-## Factory Battle Arena
+## Building Time
 
 ![](thumbnail.png)
 
