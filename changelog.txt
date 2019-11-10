@@ -1,5 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.1.1
+Date: 2019-11-10
+  Changes:
+    - Building will take extra damage if they are damaged while building.
+    - Fixed that damaging a turret that is building would result it in not dying until the building time elapsed.
+    - Fixed that picking up a partially built entity would give a damaged item.
+---------------------------------------------------------------------------------------------------
 Version: 0.1.0
-Date: 2019-??
+Date: 2019-11-09
   Changes:
     - Initial release.

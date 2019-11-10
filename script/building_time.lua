@@ -84,6 +84,44 @@ local on_entity_removed = function(event)
     smoke.destroy()
   end
 
+  local buffer = event.buffer
+
+  if buffer then
+    for k = 1, #buffer do
+      local stack = buffer[k]
+      if stack and stack.valid and stack.valid_for_read then
+        stack.health = 1
+      end
+    end
+  end
+
+end
+
+local damage_modifier = shared.damage_modifier
+
+local on_entity_damaged = function(event)
+  local entity = event.entity
+  if not (entity and entity.valid) then return end
+
+  local unit_number = entity.unit_number
+  local smoke = script_data.entity_smoke[unit_number]
+  if not (smoke and smoke.valid) then return end
+
+  local amount = event.final_damage_amount
+  local health = entity.health
+  if (health - amount) <= 0 then entity.active = true return end
+
+  local extra_damage = (amount * damage_modifier) * (1 - (entity.get_health_ratio() ^ 2))
+
+  health = health - extra_damage
+  if health <= 0 then
+    entity.active = true
+    entity.die(event.force or entity.force, event.cause)
+    return
+  end
+
+  entity.health = health
+
 end
 
 local lib = {}
@@ -95,10 +133,13 @@ lib.events =
   [defines.events.script_raised_revive] = on_built_entity,
   [defines.events.script_raised_built] = on_built_entity,
 
-  [defines.events.on_entity_died] = on_entity_removed,
   [defines.events.on_player_mined_entity] = on_entity_removed,
   [defines.events.on_robot_mined_entity] = on_entity_removed,
+
+  [defines.events.on_entity_died] = on_entity_removed,
   [defines.events.script_raised_destroy] = on_entity_removed,
+
+  [defines.events.on_entity_damaged] = on_entity_damaged,
 
   [defines.events.on_tick] = on_tick,
 }
