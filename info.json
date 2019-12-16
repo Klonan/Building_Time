@@ -6,6 +6,6 @@
   "contact": "",
   "homepage": "",
   "description": "Adds a building time to buildings",
-  "dependencies": ["base >= 0.17.69"],
+  "dependencies": ["base >= 0.17.69", "(?)Mining_Drones"],
   "factorio_version": "0.17"
 }

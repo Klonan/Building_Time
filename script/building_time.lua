@@ -20,7 +20,7 @@ local add_building_finished = function(tick, entity, unit_number)
 
   buildings[unit_number] = entity
   if not entity.active then
-    ignore_reactivation[unit_number] = true
+    script_data.ignore_reactivation[unit_number] = true
   end
 
 end
@@ -53,7 +53,7 @@ end
 
 local reactivate_entity = function(unit_number, entity)
 
-  if not (entity and entity.valid) then return end
+  if not (entity and entity.valid)   then return end
 
   local ignore = script_data.ignore_reactivation[unit_number]
   script_data.ignore_reactivation[unit_number] = nil
