@@ -53,7 +53,7 @@ end
 
 local reactivate_entity = function(unit_number, entity)
 
-  if not (entity and entity.valid)e then return end
+  if not (entity and entity.valid) then return end
 
   local ignore = script_data.ignore_reactivation[unit_number]
   script_data.ignore_reactivation[unit_number] = nil
