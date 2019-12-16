@@ -3,7 +3,8 @@ local shared = require("shared")
 local script_data =
 {
   building_finished = {},
-  entity_smoke = {}
+  entity_smoke = {},
+  ignore_reactivation = {}
 }
 
 
@@ -18,6 +19,9 @@ local add_building_finished = function(tick, entity, unit_number)
   end
 
   buildings[unit_number] = entity
+  if not entity.active then
+    ignore_reactivation[unit_number] = true
+  end
 
 end
 
@@ -47,21 +51,27 @@ local on_built_entity = function(event)
 
 end
 
+local reactivate_entity = function(unit_number, entity)
+
+  if not (entity and entity.valid)e then return end
+
+  local ignore = script_data.ignore_reactivation[unit_number]
+  script_data.ignore_reactivation[unit_number] = nil
+  entity.active = not ignore
+
+  local smoke = script_data.entity_smoke[unit_number]
+  script_data.entity_smoke[unit_number] = nil
+  if smoke and smoke.valid then
+    smoke.destroy()
+  end
+end
+
 local on_tick = function(event)
   local buildings = script_data.building_finished[event.tick]
   if not buildings then return end
 
-  local entity_smoke = script_data.entity_smoke
-
   for unit_number, entity in pairs (buildings) do
-    if entity and entity.valid then
-      entity.active = true
-      local smoke = entity_smoke[unit_number]
-      if smoke and smoke.valid then
-        smoke.destroy()
-      end
-      entity_smoke[unit_number] = nil
-    end
+    reactivate_entity(unit_number, entity)
   end
 
   script_data.building_finished[event.tick] = nil
@@ -83,6 +93,8 @@ local on_entity_removed = function(event)
   if smoke.valid then
     smoke.destroy()
   end
+
+  script_data.ignore_reactivation[unit_number] = nil
 
   local buffer = event.buffer
 
@@ -150,6 +162,10 @@ end
 
 lib.on_init = function()
   global.building_time = global.building_time or script_data
+end
+
+lib.on_configuration_changed = function()
+  script_data.ignore_reactivation = script_data.ignore_reactivation or {}
 end
 
 return lib
