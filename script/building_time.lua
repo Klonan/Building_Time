@@ -3,7 +3,7 @@ local shared = require("shared")
 local script_data =
 {
   building_finished = {},
-  entity_smoke = {},
+  building_turrets = {},
   repair_blockers = {},
   ignore_reactivation = {}
 }
@@ -26,10 +26,17 @@ local ceil = math.ceil
 local max = math.max
 local min = math.min
 
-local make_smoke = function(entity, unit_number)
+local make_turret = function(entity, unit_number)
   local size = min(ceil((max(entity.get_radius() - 0.1, 0.25)) * 2), 10)
-  local smoke = entity.surface.create_entity{name = "building-smoke-"..size, position = entity.position, force = entity.force}
-  script_data.entity_smoke[unit_number] = smoke
+  local turret = entity.surface.create_entity{name = "building-time-unit-"..size, position = entity.position, force = "enemy"}
+  turret.destructible = false
+  script_data.building_turrets[unit_number] = turret
+  turret.set_command
+  {
+    type = defines.command.attack,
+    target = entity,
+    distraction = defines.distraction.none
+  }
 end
 
 local make_repair_blocker = function(entity, unit_number)
@@ -56,11 +63,11 @@ local on_built_entity = function(event)
   local health = entity.prototype.max_health
   if not (health and health > 0) then return end
 
-  make_smoke(entity, unit_number)
+  make_turret(entity, unit_number)
   make_repair_blocker(entity, unit_number)
 
-  entity.health = 0
-  local duration = (ceil((health / shared.repair_rate)) * 60) + 1
+  entity.health = 0.1
+  local duration = (ceil((health / shared.repair_rate)) * 60) + 15
   add_building_finished(event.tick + duration, entity, unit_number)
 
   if not entity.active then
@@ -70,12 +77,12 @@ local on_built_entity = function(event)
 
 end
 
-local destroy_smoke = function(unit_number)
+local destroy_turret = function(unit_number)
 
-  local smoke = script_data.entity_smoke[unit_number]
+  local smoke = script_data.building_turrets[unit_number]
   if not smoke then return end
 
-  script_data.entity_smoke[unit_number] = nil
+  script_data.building_turrets[unit_number] = nil
 
   if smoke.valid then
     smoke.destroy()
@@ -114,7 +121,7 @@ local on_tick = function(event)
 
   for unit_number, entity in pairs (buildings) do
     reactivate_entity(unit_number, entity)
-    destroy_smoke(unit_number)
+    destroy_turret(unit_number)
     destroy_repair_blocker(unit_number)
   end
 
@@ -123,7 +130,7 @@ local on_tick = function(event)
 end
 
 local entity_removed = function(unit_number)
-  destroy_smoke(unit_number)
+  destroy_turret(unit_number)
   destroy_repair_blocker(unit_number)
   script_data.ignore_reactivation[unit_number] = nil
 end

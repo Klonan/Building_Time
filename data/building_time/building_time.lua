@@ -39,7 +39,7 @@ local smoke =
                   damage =
                   {
                     amount = - shared.repair_rate / 60,
-                    type = util.damage_type("heal")
+                    type = util.damage_type("building-time")
                   }
                 }
               }
@@ -153,7 +153,7 @@ for k = 1, 100 do
 end
 
 local explosion =
-  {
+{
   type = "explosion",
   name = "sparks-explosion",
   flags = {"not-on-map"},
@@ -168,7 +168,7 @@ data:extend
 }
 
 for k = 1, 10 do
-  make_smoke(k)
+  --make_smoke(k)
 end
 
 local robot =
@@ -210,3 +210,92 @@ local robot =
 }
 
 data:extend{robot}
+
+
+local make_turret = function(size)
+  local turret =
+  {
+    type = "unit",
+    name = "building-time-unit-"..size,
+    icon = "__base__/graphics/icons/small-worm.png",
+    localised_name = "UWU don't look at me *blushes*",
+    icon_size = 64,
+    flags = {"placeable-off-grid", "not-on-map"},
+    order = "b-c-a",
+    max_health = 200000000,
+    collision_box = {{0, 0}, {0, 0}},
+    selection_box = {{0, 0}, {0, 0}},
+    collision_mask = {},
+    run_animation = util.empty_sprite(),
+    prepare_range = 1,
+    movement_speed = 1,
+    distance_per_frame = 1,
+    pollution_to_join_attack = 10000000,
+    distraction_cooldown = 1000000,
+    vision_distance = 1,
+    attack_parameters =
+    {
+      animation = util.empty_sprite(),
+      type = "stream",
+      cooldown = 1,
+      range = 100,
+      min_range = 0,
+      ammo_type =
+      {
+        category = "building-time",
+        action =
+        {
+          type = "direct",
+          action_delivery =
+          {
+            type = "instant",
+            target_effects =
+            {
+              {
+                type = "damage",
+                damage =
+                {
+                  amount = - shared.repair_rate / 60,
+                  type = util.damage_type("building-time")
+                }
+              },
+              {
+                type = "nested-result",
+                action =
+                {
+                  type = "area",
+                  target_entities = false,
+                  probability = size / 60,
+                  radius = size / 2,
+                  action_delivery =
+                  {
+                    type = "instant",
+                    target_effects =
+                    {
+                      type = "create-entity",
+                      entity_name = "sparks-explosion"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    call_for_help_radius = 0
+  }
+  data:extend{turret}
+end
+
+for k = 1, 10 do
+  make_turret(k)
+end
+
+local category =
+{
+  type = "ammo-category",
+  name = "building-time"
+}
+
+data:extend{category}
