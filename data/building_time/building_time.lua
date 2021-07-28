@@ -36,7 +36,7 @@ local smoke =
                 target_effects =
                 {
                   type = "damage",
-                  damage = { amount = - shared.repair_rate /4, type = util.damage_type("heal")}
+                  damage = { amount = - shared.repair_rate / 4, type = util.damage_type("heal")}
                 }
               }
             },

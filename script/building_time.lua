@@ -25,6 +25,10 @@ local add_building_finished = function(tick, entity, unit_number)
 
 end
 
+local get_unit_number = function(entity)
+
+end
+
 local ceil = math.ceil
 local max = math.max
 local min = math.min
@@ -51,19 +55,31 @@ local on_built_entity = function(event)
 
 end
 
+
+local destroy_smoke = function(unit_number)
+
+  local smoke = script_data.entity_smoke[unit_number]
+  if not smoke then return end
+
+  script_data.entity_smoke[unit_number] = nil
+
+  if smoke.valid then
+    smoke.destroy()
+  end
+
+end
+
 local reactivate_entity = function(unit_number, entity)
 
-  if not (entity and entity.valid)   then return end
+  destroy_smoke(unit_number)
+
+  if not (entity and entity.valid) then return end
 
   local ignore = script_data.ignore_reactivation[unit_number]
   script_data.ignore_reactivation[unit_number] = nil
   entity.active = not ignore
 
-  local smoke = script_data.entity_smoke[unit_number]
-  script_data.entity_smoke[unit_number] = nil
-  if smoke and smoke.valid then
-    smoke.destroy()
-  end
+
 end
 
 local on_tick = function(event)
@@ -85,14 +101,7 @@ local on_entity_removed = function(event)
   local unit_number = entity.unit_number
   if not unit_number then return end
 
-  local smoke = script_data.entity_smoke[unit_number]
-  if not smoke then return end
-
-  script_data.entity_smoke[unit_number] = nil
-
-  if smoke.valid then
-    smoke.destroy()
-  end
+  destroy_smoke(unit_number)
 
   script_data.ignore_reactivation[unit_number] = nil
 
@@ -106,33 +115,6 @@ local on_entity_removed = function(event)
       end
     end
   end
-
-end
-
-local damage_modifier = shared.damage_modifier
-
-local on_entity_damaged = function(event)
-  local entity = event.entity
-  if not (entity and entity.valid) then return end
-
-  local unit_number = entity.unit_number
-  local smoke = script_data.entity_smoke[unit_number]
-  if not (smoke and smoke.valid) then return end
-
-  local amount = event.final_damage_amount
-  local health = entity.health
-  if (health - amount) <= 0 then entity.active = true return end
-
-  local extra_damage = (amount * damage_modifier) * (1 - (entity.get_health_ratio() ^ 2))
-
-  health = health - extra_damage
-  if health <= 0 then
-    entity.active = true
-    entity.die(event.force or entity.force, event.cause)
-    return
-  end
-
-  entity.health = health
 
 end
 
@@ -151,7 +133,7 @@ lib.events =
   [defines.events.on_entity_died] = on_entity_removed,
   [defines.events.script_raised_destroy] = on_entity_removed,
 
-  [defines.events.on_entity_damaged] = on_entity_damaged,
+  [defines.events.on_entity_destroyed] = on_entity_destroyed,
 
   [defines.events.on_tick] = on_tick,
 }
@@ -165,7 +147,7 @@ lib.on_init = function()
 end
 
 lib.on_configuration_changed = function()
-  script_data.ignore_reactivation = script_data.ignore_reactivation or {}
+
 end
 
 return lib
