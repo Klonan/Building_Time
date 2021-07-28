@@ -28,7 +28,7 @@ local smoke =
             {
               type = "area",
               collision_mode = "distance-from-center",
-              radius = 0.1,
+              radius = 0,
               force = "same",
               action_delivery =
               {
@@ -36,15 +36,18 @@ local smoke =
                 target_effects =
                 {
                   type = "damage",
-                  damage = { amount = - shared.repair_rate / 4, type = util.damage_type("heal")}
+                  damage =
+                  {
+                    amount = - shared.repair_rate / 60,
+                    type = util.damage_type("heal")
+                  }
                 }
               }
             },
             {
               type = "area",
-              repeat_count = size,
               target_entities = false,
-              --probability = 0.5,
+              probability = size / 60,
               radius = size / 2,
               action_delivery =
               {
@@ -60,7 +63,7 @@ local smoke =
         }
       }
     },
-    action_cooldown = 15
+    action_cooldown = 1
   }
   data:extend{smoke}
 end
@@ -167,3 +170,43 @@ data:extend
 for k = 1, 10 do
   make_smoke(k)
 end
+
+local robot =
+{
+  type = "construction-robot",
+  name = "repair-block-robot",
+  localised_name = "UwU, you weren't meant to see me oUo",
+  icon = "__base__/graphics/icons/construction-robot.png",
+  icon_size = 32,
+  flags = {"placeable-off-grid", "not-on-map"},
+  max_health = 1000000000,
+  collision_box = {{0, 0}, {0, 0}},
+  selection_box = {{0, 0}, {0, 0}},
+  hit_visualization_box = {{0, 0}, {0, 0}},
+  max_payload_size = 1,
+  speed = 0,
+  max_energy = "15000MJ",
+  energy_per_tick = "0.01J",
+  speed_multiplier_when_out_of_energy = 1,
+  energy_per_move = "0.01J",
+  min_to_charge = 0.01,
+  max_to_charge = 0.99,
+  repairing_sound =
+  {
+    { filename = "__base__/sound/robot-repair-1.ogg", volume = 0},
+  },
+  cargo_centered = {0, 0},
+  construction_vector = {0, 0},
+  idle = util.empty_sprite(),
+  idle_with_cargo = util.empty_sprite(),
+  in_motion = util.empty_sprite(),
+  in_motion_with_cargo = util.empty_sprite(),
+  shadow_idle = util.empty_sprite(),
+  shadow_idle_with_cargo = util.empty_sprite(),
+  shadow_in_motion = util.empty_sprite(),
+  shadow_in_motion_with_cargo = util.empty_sprite(),
+  working = util.empty_sprite(),
+  shadow_working = util.empty_sprite()
+}
+
+data:extend{robot}
