@@ -6,7 +6,8 @@ local script_data =
   building_turrets = {},
   repair_blockers = {},
   fake_roboports = {},
-  ignore_reactivation = {}
+  ignore_reactivation = {},
+  unit_map = {}
 }
 
 local insert = table.insert
@@ -32,16 +33,13 @@ local make_turret = function(entity, unit_number)
   local turret = entity.surface.create_entity{name = "building-time-unit-"..size, position = entity.position, force = entity.force}
   turret.destructible = false
   script_data.building_turrets[unit_number] = turret
+  script_data.unit_map[turret.unit_number] = entity
   turret.set_command
   {
     type = defines.command.attack,
     target = entity,
     distraction = defines.distraction.none
   }
-end
-
-local make_fake_roboport = function(entity, unit_number)
-
 end
 
 local make_repair_blocker = function(entity, unit_number)
@@ -140,13 +138,14 @@ end
 
 local destroy_turret = function(unit_number)
 
-  local smoke = script_data.building_turrets[unit_number]
-  if not smoke then return end
+  local unit = script_data.building_turrets[unit_number]
+  if not unit then return end
 
   script_data.building_turrets[unit_number] = nil
 
-  if smoke.valid then
-    smoke.destroy()
+  if unit.valid then
+    script_data.unit_map[unit.unit_number] = nil
+    unit.destroy()
   end
 
 end
@@ -234,11 +233,22 @@ local on_entity_removed = function(event)
 
 end
 
-
 local on_entity_destroyed = function(event)
   if event.unit_number then
     entity_removed(event.unit_number)
   end
+end
+
+local on_ai_command_complete = function(event)
+  local building = script_data.unit_map[event.unit_number]
+  if not building then return end
+  -- This is really only to handle the case of turrets dying
+  if building.valid then
+    if building.get_health_ratio() == 0 then
+      building.active = true
+    end
+  end
+  script_data.unit_map[event.unit_number] = nil
 end
 
 local lib = {}
@@ -256,6 +266,8 @@ lib.events =
   [defines.events.script_raised_destroy] = on_entity_removed,
 
   [defines.events.on_entity_destroyed] = on_entity_destroyed,
+
+  [defines.events.on_ai_command_completed] = on_ai_command_complete,
 
   [defines.events.on_tick] = on_tick,
 }
