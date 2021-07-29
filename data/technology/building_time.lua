@@ -2,34 +2,34 @@
 local name = "building-time-technology"
 local levels =
 {
-  [1] =
-  {
-    {"automation-science-pack", 1},
-  },
-  [2] =
   {
     {"automation-science-pack", 1},
     {"logistic-science-pack", 1},
   },
-  [3] =
+  {
+    {"automation-science-pack", 1},
+    {"logistic-science-pack", 1},
+  },
   {
     {"automation-science-pack", 1},
     {"logistic-science-pack", 1},
     {"chemical-science-pack", 1},
   },
-  [4] =
   {
     {"automation-science-pack", 1},
     {"logistic-science-pack", 1},
     {"chemical-science-pack", 1},
-    {"production-science-pack", 1},
   },
-  [5] =
   {
     {"automation-science-pack", 1},
     {"logistic-science-pack", 1},
     {"chemical-science-pack", 1},
-    {"production-science-pack", 1},
+    {"utility-science-pack", 1},
+  },
+  {
+    {"automation-science-pack", 1},
+    {"logistic-science-pack", 1},
+    {"chemical-science-pack", 1},
     {"utility-science-pack", 1},
   }
 }
@@ -58,7 +58,7 @@ for k, ingredients in pairs (levels) do
         use_icon_overlay_constant = false
       },
     },
-    prerequisites = k > 1 and {name.."-"..k - 1} or {},
+    prerequisites = k > 1 and {name.."-"..k - 1} or {"logistic-science-pack"},
     unit =
     {
       count = k * 200,

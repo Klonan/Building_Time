@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 0.2.0
+Date: 2021-07-29
+  Changes:
+    - Update for 1.1.
+    - Automated repair of entities being built is blocked.
+    - New technology to decrease the building time of things.
+    - Some entity types are excluded from building time, such as belts.
+---------------------------------------------------------------------------------------------------
 Version: 0.1.2
 Date: 2019-12-16
   Changes:
