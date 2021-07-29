@@ -40,15 +40,38 @@ local make_turret = function(entity, unit_number)
 end
 
 local make_repair_blocker = function(entity, unit_number)
-  local blocker = entity.surface.create_entity{name = "repair-block-robot", position = entity.position, force = entity.force}
+  local surface = entity.surface
+  local force = entity.force
+  local position = entity.position
+
+  local blocker = surface.create_entity{name = "repair-block-robot", position = position, force = force}
   if not (blocker and blocker.valid) then return end
+
   local repair_inventory = blocker.get_inventory(defines.inventory.robot_repair)
   if repair_inventory then
     repair_inventory.insert("repair-pack")
   end
+
   blocker.destructible = false
   blocker.active = false
+
+  local networks = surface.find_logistic_networks_by_construction_area(position, force)
+  local index, first = next(networks)
+
+  if first then
+    blocker.logistic_network = first
+  end
+
   script_data.repair_blockers[unit_number] = blocker
+  --[[
+    rendering.draw_circle
+    {
+      surface = blocker.surface,
+      radius = 0.5,
+      target = blocker,
+      color = {1, 1, 1}
+    }
+    ]]
 end
 
 local ammo_name = "building-time"
@@ -56,6 +79,33 @@ local get_build_duration = function(health, entity)
   local modifier = 1 / (1 + entity.force.get_ammo_damage_modifier(ammo_name))
   return (ceil(modifier * (health / shared.repair_rate)) * 60) + 15
 end
+
+local ignore_types =
+{
+  ["transport-belt"] = true,
+  ["underground-belt"] = true,
+  ["splitter"] = true,
+  --["pipe"] = true,
+  --["pipe-to-ground"] = true,
+  --["storage-tank"] = true,
+  ["unit"] = true,
+  ["unit-spawner"] = true,
+  ["explosion"] = true,
+  ["tree"] = true,
+  ["heat-pipe"] = true,
+  ["landmine"] = true,
+  ["combat-robot"] = true,
+  ["construction-robot"] = true,
+  ["logistic-robot"] = true,
+  ["straight-rail"] = true,
+  ["curved-rail"] = true,
+  ["rail-signal"] = true,
+  ["rail-chain-signal"] = true,
+  ["container"] = true,
+  ["logistic-container"] = true,
+  ["electric-energy-interface"] = true,
+  [""] = true,
+}
 
 local on_built_entity = function(event)
 
