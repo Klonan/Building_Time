@@ -211,7 +211,6 @@ local robot =
 
 data:extend{robot}
 
-
 local lines =
 {
   "We're no strangers to love",
