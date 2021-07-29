@@ -212,16 +212,34 @@ local robot =
 data:extend{robot}
 
 
+local lines =
+{
+  "We're no strangers to love",
+  "You know the rules and so do I",
+  "A full commitment's what I'm thinking of",
+  "You wouldn't get this from any other guy",
+  "",
+  "I just wanna tell you how I'm feeling",
+  "Gotta make you understand",
+  "",
+  "Never gonna give you up",
+  "Never gonna let you down",
+  "Never gonna run around and desert you",
+  "Never gonna make you cry",
+  "Never gonna say goodbye",
+  "Never gonna tell a lie and hurt you"
+}
+
 local make_turret = function(size)
   local turret =
   {
     type = "unit",
     name = "building-time-unit-"..size,
-    icon = "__base__/graphics/icons/small-worm.png",
-    localised_name = "UWU don't look at me *blushes*",
+    icon = "__base__/graphics/icons/repair-pack.png",
+    localised_name = lines[size] or "",
+    order = string.rep("Z", size),
     icon_size = 64,
     flags = {"placeable-off-grid", "not-on-map"},
-    order = "b-c-a",
     max_health = 200000000,
     collision_box = {{0, 0}, {0, 0}},
     selection_box = {{0, 0}, {0, 0}},
@@ -288,7 +306,7 @@ local make_turret = function(size)
   data:extend{turret}
 end
 
-for k = 1, 10 do
+for k = 1, 12 do
   make_turret(k)
 end
 
