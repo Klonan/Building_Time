@@ -316,3 +316,55 @@ local category =
 }
 
 data:extend{category}
+
+local repair_block_roboport =
+{
+  type = "roboport",
+  name = "repair-block-roboport",
+  icon = "__base__/graphics/icons/roboport.png",
+  icon_size = 64,
+  flags = {"placeable-off-grid","not-on-map"},
+  max_health = 50000000,
+  collision_box = {{0, 0}, {0, 0}},
+  selection_box = {{0, 0}, {0, 0}},
+  energy_source =
+  {
+    type = "void",
+    usage_priority = "secondary-input",
+    input_flow_limit = "5MW",
+    buffer_capacity = "100MJ"
+  },
+  recharge_minimum = "40MJ",
+  energy_usage = "50kW",
+  -- per one charge slot
+  charging_energy = "1000kW",
+  logistics_radius = 0,
+  construction_radius = 1,
+  charge_approach_distance = 0,
+  robot_slots_count = 0,
+  material_slots_count = 0,
+  stationing_offset = {0, 0},
+  charging_offsets = {},
+  base =util.empty_sprite(),
+  base_patch =util.empty_sprite(),
+  base_animation =util.empty_sprite(),
+  door_animation_up =util.empty_sprite(),
+  door_animation_down =util.empty_sprite(),
+  recharging_animation =util.empty_sprite(),
+  request_to_open_door_timeout = 15,
+  spawn_and_station_height = -0.1,
+
+  draw_logistic_radius_visualization = false,
+  draw_construction_radius_visualization = false,
+
+  circuit_wire_connection_point = circuit_connector_definitions["roboport"].points,
+  circuit_connector_sprites = circuit_connector_definitions["roboport"].sprites,
+  circuit_wire_max_distance = default_circuit_wire_max_distance,
+
+  default_available_logistic_output_signal = {type = "virtual", name = "signal-X"},
+  default_total_logistic_output_signal = {type = "virtual", name = "signal-Y"},
+  default_available_construction_output_signal = {type = "virtual", name = "signal-Z"},
+  default_total_construction_output_signal = {type = "virtual", name = "signal-T"},
+}
+
+data:extend{repair_block_roboport}

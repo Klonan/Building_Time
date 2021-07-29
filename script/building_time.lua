@@ -5,6 +5,7 @@ local script_data =
   building_finished = {},
   building_turrets = {},
   repair_blockers = {},
+  fake_roboports = {},
   ignore_reactivation = {}
 }
 
@@ -39,6 +40,10 @@ local make_turret = function(entity, unit_number)
   }
 end
 
+local make_fake_roboport = function(entity, unit_number)
+
+end
+
 local make_repair_blocker = function(entity, unit_number)
   local surface = entity.surface
   local force = entity.force
@@ -60,18 +65,15 @@ local make_repair_blocker = function(entity, unit_number)
 
   if first then
     blocker.logistic_network = first
+  else
+    local fake_robo = surface.create_entity{name = "repair-block-roboport", position = position, force = force}
+    script_data.fake_roboports[unit_number] = fake_robo
+    blocker.logistic_network = fake_robo.logistic_network
+    fake_robo.active = false
+    fake_robo.destructible = false
   end
 
   script_data.repair_blockers[unit_number] = blocker
-  --[[
-    rendering.draw_circle
-    {
-      surface = blocker.surface,
-      radius = 0.5,
-      target = blocker,
-      color = {1, 1, 1}
-    }
-    ]]
 end
 
 local ammo_name = "building-time"
@@ -160,6 +162,17 @@ local destroy_repair_blocker = function(unit_number)
   end
 end
 
+local destroy_fake_roboport = function(unit_number)
+  local roboport = script_data.fake_roboports[unit_number]
+  if not roboport then return end
+
+  script_data.fake_roboports[unit_number] = nil
+
+  if roboport.valid then
+    roboport.destroy()
+  end
+end
+
 local reactivate_entity = function(unit_number, entity)
 
   local ignore = script_data.ignore_reactivation[unit_number]
@@ -182,6 +195,7 @@ local on_tick = function(event)
     reactivate_entity(unit_number, entity)
     destroy_turret(unit_number)
     destroy_repair_blocker(unit_number)
+    destroy_fake_roboport(unit_number)
   end
 
   script_data.building_finished[tick] = nil
@@ -191,6 +205,7 @@ end
 local entity_removed = function(unit_number)
   destroy_turret(unit_number)
   destroy_repair_blocker(unit_number)
+  destroy_fake_roboport(unit_number)
   script_data.ignore_reactivation[unit_number] = nil
 end
 
