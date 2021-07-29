@@ -239,7 +239,7 @@ local make_turret = function(size)
       type = "stream",
       cooldown = 1,
       range = 100,
-      min_range = 0,
+      min_range = -1,
       ammo_type =
       {
         category = "building-time",

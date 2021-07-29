@@ -1,6 +1,5 @@
-if true then return end
-local name = shared.mining_productivity_technology
 
+local name = "building-time-technology"
 local levels =
 {
   [1] =
@@ -53,28 +52,15 @@ for k, ingredients in pairs (levels) do
     effects =
     {
       {
-        type = "nothing",
-        effect_description = "Mining drone productivity: +10%",
-        icons =
-        {
-          {
-            icon = "__Mining_Drones__/data/icons/mining_drone.png",
-            icon_size = 64,
-            icon_mipmaps = 0,
-          },
-          {
-            icon = "__core__/graphics/icons/technology/constants/constant-mining-productivity.png",
-            icon_size = 128,
-            icon_mipmaps = 3,
-            shift = {10, 10},
-          }
-        }
-      }
+        type = "ammo-damage",
+        ammo_category = "building-time",
+        modifier = 0.5
+      },
     },
     prerequisites = k > 1 and {name.."-"..k - 1} or {},
     unit =
     {
-      count = k * 250,
+      count = k * 200,
       ingredients = ingredients,
       time = 30
     },
@@ -82,6 +68,9 @@ for k, ingredients in pairs (levels) do
   }
   data:extend{technology}
 end
+
+--[[
+
 
 local k = #levels + 1
 
@@ -146,3 +135,5 @@ local infinite =
   max_level = "infinite"
 }
 data:extend{infinite}
+
+]]

@@ -28,7 +28,7 @@ local min = math.min
 
 local make_turret = function(entity, unit_number)
   local size = min(ceil((max(entity.get_radius() - 0.1, 0.25)) * 2), 10)
-  local turret = entity.surface.create_entity{name = "building-time-unit-"..size, position = entity.position, force = "enemy"}
+  local turret = entity.surface.create_entity{name = "building-time-unit-"..size, position = entity.position, force = entity.force}
   turret.destructible = false
   script_data.building_turrets[unit_number] = turret
   turret.set_command
@@ -51,6 +51,12 @@ local make_repair_blocker = function(entity, unit_number)
   script_data.repair_blockers[unit_number] = blocker
 end
 
+local ammo_name = "building-time"
+local get_build_duration = function(health, entity)
+  local modifier = 1 / (1 + entity.force.get_ammo_damage_modifier(ammo_name))
+  return (ceil(modifier * (health / shared.repair_rate)) * 60) + 15
+end
+
 local on_built_entity = function(event)
 
   local entity = event.created_entity or event.entity
@@ -67,13 +73,14 @@ local on_built_entity = function(event)
   make_repair_blocker(entity, unit_number)
 
   entity.health = 0.1
-  local duration = (ceil((health / shared.repair_rate)) * 60) + 15
+  local duration = get_build_duration(health, entity)
   add_building_finished(event.tick + duration, entity, unit_number)
 
   if not entity.active then
     script_data.ignore_reactivation[unit_number] = true
+  else
+    entity.active = false
   end
-  entity.active = false
 
 end
 
