@@ -54,7 +54,8 @@ for k, ingredients in pairs (levels) do
       {
         type = "ammo-damage",
         ammo_category = "building-time",
-        modifier = 0.5
+        modifier = 0.5,
+        use_icon_overlay_constant = false
       },
     },
     prerequisites = k > 1 and {name.."-"..k - 1} or {},
