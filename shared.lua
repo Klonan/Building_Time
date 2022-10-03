@@ -2,6 +2,6 @@
 
 local data = {}
 
-data.repair_rate = 25 -- In health per second
+data.repair_rate = settings.startup["building-speed"].value -- In health per second
 
 return data
